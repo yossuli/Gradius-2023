@@ -6,6 +6,7 @@ import Boom from 'src/components/Effect/Boom';
 import { Bullet } from 'src/components/Entity/Bullet';
 import { Enemy } from 'src/components/Entity/Enemy';
 import { Player } from 'src/components/Entity/Player';
+import { Traffic } from 'src/components/traffic/traffic';
 import { useGame } from 'src/pages/hooks/useGame';
 import { staticPath } from 'src/utils/$path';
 import { apiClient } from 'src/utils/apiClient';
@@ -33,7 +34,9 @@ const Game = () => {
 
   const [backgroundImage] = useImage(staticPath.images.odaiba_jpg);
 
-  const { bullets, players, enemies, effectPosition } = useGame({ displayPosition });
+  const { bullets, players, enemies, effectPosition, time1, time2, time3, time4, time5 } = useGame({
+    displayPosition,
+  });
 
   useEffect(() => {
     const redirectToLobby = async () => {
@@ -59,6 +62,11 @@ const Game = () => {
 
   return (
     <div className={styles.canvasContainer}>
+      <Traffic traffic={time1} left={0} length={20} text="BEとの通信" />
+      <Traffic traffic={time2} left={200} length={20} text="fetch player" />
+      <Traffic traffic={time3} left={400} length={20} text="fetch bullet" />
+      <Traffic traffic={time4} left={600} length={20} text="fetch enemies" />
+      <Traffic traffic={time5} left={800} length={20} text="爆発エフェクト計算" />
       <Stage
         width={SCREEN_WIDTH}
         height={SCREEN_HEIGHT}

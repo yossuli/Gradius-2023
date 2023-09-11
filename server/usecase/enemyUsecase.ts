@@ -9,7 +9,8 @@ import { randomUUID } from 'crypto';
 const updateIntervalId: NodeJS.Timeout[] = [];
 const createIntervalId: NodeJS.Timeout[] = [];
 const ENEMY_UPDATE_INTERVAL = 100;
-const ENEMY_CREATE_INTERVAL = 1000;
+const ENEMY_CREATE_INTERVAL = 50;
+const MAXMEM_ENEMY_COUNT = 13;
 
 export const enemyUseCase = {
   init: () => {
@@ -39,17 +40,22 @@ export const enemyUseCase = {
     const count = await enemyRepository.count();
     const displayNumber = (await gameRepository.find().then((game) => game?.displayNumber)) ?? 1;
 
-    if (count > 12) return null;
+    if (count > MAXMEM_ENEMY_COUNT - 1) return null;
 
     const newEnemy = await enemyRepository.create({
       id: enemyIdParser.parse(randomUUID()),
       direction: {
-        x: (Math.random() >= 0.5 ? 1 : -1) * 0.5,
+        x:
+          (Math.random() >= 0.5
+            ? 1
+            : // -
+              1) * 0.5,
         y: 0,
       },
       createdPos: {
         x: Math.random() * (SCREEN_WIDTH * displayNumber - 1000) + 500,
-        y: Math.floor(Math.random() * SCREEN_HEIGHT),
+        y: 500,
+        // Math.floor(Math.random() * SCREEN_HEIGHT)
       },
       createdAt: Date.now(),
       type: Math.floor(Math.random() * 3),
