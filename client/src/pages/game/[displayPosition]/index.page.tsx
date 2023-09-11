@@ -2,9 +2,10 @@ import { SCREEN_HEIGHT, SCREEN_WIDTH } from 'commonConstantsWithClient';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { Image, Layer, Stage } from 'react-konva';
-import { BulletLayer } from 'src/components/EntityLayer/BulletLayer';
-import { EnemyLayer } from 'src/components/EntityLayer/EnemyLayer';
-import { PlayerLayer } from 'src/components/EntityLayer/PlayerLayer';
+import Boom from 'src/components/Effect/Boom';
+import { Bullet } from 'src/components/Entity/Bullet';
+import { Enemy } from 'src/components/Entity/Enemy';
+import { Player } from 'src/components/Entity/Player';
 import { Traffic } from 'src/components/traffic/traffic';
 import { useGame } from 'src/pages/hooks/useGame';
 import { staticPath } from 'src/utils/$path';
@@ -33,7 +34,7 @@ const Game = () => {
 
   const [backgroundImage] = useImage(staticPath.images.odaiba_jpg);
 
-  const { effectPosition, time1, time2, time3, time4, time5 } = useGame({
+  const { bullets, players, enemies, effectPosition, time1, time2, time3, time4, time5 } = useGame({
     displayPosition,
   });
 
@@ -87,14 +88,26 @@ const Game = () => {
             opacity={0.8}
           />
         </Layer>
-        <BulletLayer displayPosition={displayPosition} />
-        <PlayerLayer displayPosition={displayPosition} />
-        <EnemyLayer displayPosition={displayPosition} />
-        {/* <Layer>
+        <Layer>
+          {bullets.map((bullet) => (
+            <Bullet displayPosition={displayPosition ?? 0} bullet={bullet} key={bullet.id} />
+          ))}
+        </Layer>
+        <Layer>
+          {players.map((player) => (
+            <Player displayPosition={displayPosition ?? 0} player={player} key={player.id} />
+          ))}
+        </Layer>
+        <Layer>
+          {enemies.map((enemy) => (
+            <Enemy displayPosition={displayPosition ?? 0} enemy={enemy} key={enemy.id} />
+          ))}
+        </Layer>
+        <Layer>
           {effectPosition.map((position, index) => (
             <Boom displayPosition={displayPosition ?? 0} position={position} key={index} />
           ))}
-        </Layer> */}
+        </Layer>
       </Stage>
     </div>
   );
