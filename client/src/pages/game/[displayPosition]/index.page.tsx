@@ -133,7 +133,7 @@ const Game = () => {
       killedEnemies.forEach((enemy) => {
         const pos = computePosition(enemy.createdPos, enemy.createdAt, enemy.direction);
         setEffectPosition((prev) => [
-          ...prev,
+          ...prev.slice(-10),
           [pos.x - ENEMY_HALF_WIDTH, pos.y - ENEMY_HALF_WIDTH],
         ]);
       });
