@@ -63,10 +63,10 @@ const Game = () => {
   return (
     <div className={styles.canvasContainer}>
       <Traffic traffic={time1} left={0} length={20} text="BEとの通信" />
-      <Traffic traffic={time2} left={200} length={20} text="fetch player" />
-      <Traffic traffic={time3} left={400} length={20} text="fetch bullet" />
-      <Traffic traffic={time4} left={600} length={20} text="fetch enemies" />
-      <Traffic traffic={time5} left={800} length={20} text="爆発エフェクト計算" />
+      <Traffic traffic={time4} left={200} length={20} text="fetch player" />
+      <Traffic traffic={time5} left={400} length={20} text="fetch bullet" />
+      <Traffic traffic={time2} left={600} length={20} text="fetch enemies" />
+      <Traffic traffic={time3} left={800} length={20} text="爆発エフェクト計算" />
       <Stage
         width={SCREEN_WIDTH}
         height={SCREEN_HEIGHT}
