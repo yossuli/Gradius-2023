@@ -17,7 +17,7 @@ export const useGame = ({ displayPosition }: { displayPosition: number | null })
   const [enemies, setEnemies] = useState<EnemyModel[]>([]);
   const [bullets, setBullets] = useState<BulletModel[]>([]);
   //TODO: もし、これ以外のエフェクトを追加する場合は、それぞれのエフェクトを区別する型を作成する
-  const [effectPosition, setEffectPosition] = useState<number[][]>([]);
+  const [effectPosition, setEffectPosition] = useState<number[][][]>([[[]]]);
 
   const { startTime, endTime, start, end } = usePerformanceTimer();
   const { startTime2, endTime2, start2, end2 } = usePerformanceTimer2();
@@ -42,18 +42,14 @@ export const useGame = ({ displayPosition }: { displayPosition: number | null })
     const res = await apiClient.enemy.$get();
 
     start3();
-
     const killedEnemies = enemies.filter((enemy) => !res.some((e) => e.id === enemy.id));
     if (killedEnemies.length > 0) {
-      killedEnemies.forEach((enemy) => {
+      const newEffectPosition = killedEnemies.map((enemy) => {
         const pos = computePosition(enemy.createdPos, enemy.createdAt, enemy.direction);
-        setEffectPosition((prev) => [
-          ...prev,
-          [pos.x - ENEMY_HALF_WIDTH, pos.y - ENEMY_HALF_WIDTH],
-        ]);
+        return [pos.x - ENEMY_HALF_WIDTH, pos.y - ENEMY_HALF_WIDTH];
       });
+      setEffectPosition((prev) => [...prev.slice(-30), newEffectPosition]);
     }
-
     end3();
 
     setEnemies(res);
@@ -99,6 +95,7 @@ export const useGame = ({ displayPosition }: { displayPosition: number | null })
   const time3 = startTime3 - endTime3;
   const time4 = startTime4 - endTime4;
   const time5 = startTime5 - endTime5;
+  console.log(effectPosition.length);
   return {
     bullets,
     players,

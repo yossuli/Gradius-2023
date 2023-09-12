@@ -7,7 +7,7 @@ import { Bullet } from 'src/components/Entity/Bullet';
 import { Enemy } from 'src/components/Entity/Enemy';
 import { Player } from 'src/components/Entity/Player';
 import { Traffic } from 'src/components/traffic/traffic';
-import { useGame } from 'src/pages/hooks/useGame';
+import { useGame } from 'src/hooks/useGame';
 import { staticPath } from 'src/utils/$path';
 import { apiClient } from 'src/utils/apiClient';
 import useImage from 'use-image';
@@ -104,7 +104,7 @@ const Game = () => {
           ))}
         </Layer>
         <Layer>
-          {effectPosition.map((position, index) => (
+          {effectPosition.flat().map((position, index) => (
             <Boom displayPosition={displayPosition ?? 0} position={position} key={index} />
           ))}
         </Layer>
