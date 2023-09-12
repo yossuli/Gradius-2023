@@ -1,5 +1,4 @@
-import { ENEMY_HALF_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH } from 'commonConstantsWithClient';
-import type { BulletModel, EnemyModel, PlayerModel } from 'commonTypesWithClient/models';
+import { SCREEN_HEIGHT, SCREEN_WIDTH } from 'commonConstantsWithClient';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { Image, Layer, Stage } from 'react-konva';
@@ -7,9 +6,10 @@ import Boom from 'src/components/Effect/Boom';
 import { Bullet } from 'src/components/Entity/Bullet';
 import { Enemy } from 'src/components/Entity/Enemy';
 import { Player } from 'src/components/Entity/Player';
+import { Traffic } from 'src/components/traffic/traffic';
+import { useGame } from 'src/hooks/useGame';
 import { staticPath } from 'src/utils/$path';
 import { apiClient } from 'src/utils/apiClient';
-import { computePosition } from 'src/utils/computePosition';
 import useImage from 'use-image';
 import styles from './index.module.css';
 
@@ -27,12 +27,6 @@ const Game = () => {
       displayPosition = parsed;
     }
   }
-
-  const [players, setPlayers] = useState<PlayerModel[]>([]);
-  const [enemies, setEnemies] = useState<EnemyModel[]>([]);
-  const [bullets, setBullets] = useState<BulletModel[]>([]);
-  //TODO: もし、これ以外のエフェクトを追加する場合は、それぞれのエフェクトを区別する型を作成する
-  const [effectPosition, setEffectPosition] = useState<number[][]>([]);
   const [windowSize, setWindowSize] = useState<WindowSize>({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -40,53 +34,19 @@ const Game = () => {
 
   const [backgroundImage] = useImage(staticPath.images.odaiba_jpg);
 
-  const fetchPlayers = async () => {
-    const res = await apiClient.player.$get({
-      query: { displayNumber: Number(displayPosition) },
-    });
-    setPlayers(res);
-  };
-
-  const fetchEnemies = async () => {
-    const res = await apiClient.enemy.$get();
-    const killedEnemies = enemies.filter((enemy) => !res.some((e) => e.id === enemy.id));
-    if (killedEnemies.length > 0) {
-      killedEnemies.forEach((enemy) => {
-        const pos = computePosition(enemy.createdPos, enemy.createdAt, enemy.direction);
-        setEffectPosition((prev) => [
-          ...prev,
-          [pos.x - ENEMY_HALF_WIDTH, pos.y - ENEMY_HALF_WIDTH],
-        ]);
-      });
-    }
-    setEnemies(res);
-  };
-
-  const fetchBullets = async () => {
-    const res = await apiClient.bullet.$get({
-      query: { displayNumber: Number(displayPosition) },
-    });
-    if (res.length > bullets.length) {
-      const audio = new Audio(staticPath.sounds.shot_mp3);
-      audio.play();
-    }
-    setBullets(res);
-  };
-
-  useEffect(() => {
-    const cancelId = requestAnimationFrame(async () => {
-      await Promise.all([fetchPlayers(), fetchEnemies(), fetchBullets()]);
-    });
-    return () => cancelAnimationFrame(cancelId);
+  const { bullets, players, enemies, effectPosition, time1, time2, time3, time4, time5 } = useGame({
+    displayPosition,
   });
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setEffectPosition((prev) => prev.slice(1));
-    }, 1000);
-
-    return () => clearTimeout(timeoutId);
-  }, [effectPosition]);
+    const redirectToLobby = async () => {
+      const res = await apiClient.config.$get();
+      if (Number(displayPosition) >= (res ?? 1)) {
+        router.push('/game');
+      }
+    };
+    redirectToLobby();
+  }, [router, displayPosition]);
 
   useEffect(() => {
     const set = () => {
@@ -100,18 +60,13 @@ const Game = () => {
     return () => window.removeEventListener('resize', set);
   }, []);
 
-  useEffect(() => {
-    const redirectToLobby = async () => {
-      const res = await apiClient.config.$get();
-      if (Number(displayPosition) >= (res ?? 1)) {
-        router.push('/game');
-      }
-    };
-    redirectToLobby();
-  }, [router, displayPosition]);
-
   return (
     <div className={styles.canvasContainer}>
+      <Traffic traffic={time1} left={0} length={20} text="BEとの通信" />
+      <Traffic traffic={time4} left={200} length={20} text="fetch player" />
+      <Traffic traffic={time5} left={400} length={20} text="fetch bullet" />
+      <Traffic traffic={time2} left={600} length={20} text="fetch enemies" />
+      <Traffic traffic={time3} left={800} length={20} text="爆発エフェクト計算" />
       <Stage
         width={SCREEN_WIDTH}
         height={SCREEN_HEIGHT}
@@ -149,7 +104,7 @@ const Game = () => {
           ))}
         </Layer>
         <Layer>
-          {effectPosition.map((position, index) => (
+          {effectPosition.flat().map((position, index) => (
             <Boom displayPosition={displayPosition ?? 0} position={position} key={index} />
           ))}
         </Layer>
