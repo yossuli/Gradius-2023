@@ -50,6 +50,7 @@ const Boom = ({ displayPosition, position }: Props) => {
       clearInterval(intervalId);
     };
   }, [boomImages.length, currentImageIndex]);
+  // console.log(currentImageIndex);
 
   return (
     <Image

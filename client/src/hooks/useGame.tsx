@@ -42,16 +42,14 @@ export const useGame = ({ displayPosition }: { displayPosition: number | null })
     const res = await apiClient.enemy.$get();
 
     start3();
-
     const killedEnemies = enemies.filter((enemy) => !res.some((e) => e.id === enemy.id));
     if (killedEnemies.length > 0) {
       const newEffectPosition = killedEnemies.map((enemy) => {
         const pos = computePosition(enemy.createdPos, enemy.createdAt, enemy.direction);
         return [pos.x - ENEMY_HALF_WIDTH, pos.y - ENEMY_HALF_WIDTH];
       });
-      setEffectPosition((prev) => [...prev.slice(30), newEffectPosition]);
+      setEffectPosition((prev) => [...prev.slice(-30), newEffectPosition]);
     }
-
     end3();
 
     setEnemies(res);
@@ -97,6 +95,7 @@ export const useGame = ({ displayPosition }: { displayPosition: number | null })
   const time3 = startTime3 - endTime3;
   const time4 = startTime4 - endTime4;
   const time5 = startTime5 - endTime5;
+  console.log(effectPosition.length);
   return {
     bullets,
     players,
