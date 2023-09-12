@@ -43,13 +43,11 @@ export const useGame = ({ displayPosition }: { displayPosition: number | null })
 
     start3();
     const killedEnemies = enemies.filter((enemy) => !res.some((e) => e.id === enemy.id));
-    if (killedEnemies.length > 0) {
-      const newEffectPosition = killedEnemies.map((enemy) => {
-        const pos = computePosition(enemy.createdPos, enemy.createdAt, enemy.direction);
-        return [pos.x - ENEMY_HALF_WIDTH, pos.y - ENEMY_HALF_WIDTH];
-      });
-      setEffectPosition((prev) => [...prev.slice(-30), newEffectPosition]);
-    }
+    const newEffectPosition = killedEnemies.map((enemy) => {
+      const pos = computePosition(enemy.createdPos, enemy.createdAt, enemy.direction);
+      return [pos.x - ENEMY_HALF_WIDTH, pos.y - ENEMY_HALF_WIDTH];
+    });
+    setEffectPosition((prev) => [...prev.slice(-5), newEffectPosition]);
     end3();
 
     setEnemies(res);
@@ -82,13 +80,13 @@ export const useGame = ({ displayPosition }: { displayPosition: number | null })
     return () => cancelAnimationFrame(cancelId);
   }, [fetchBullets, fetchEnemies, fetchPlayers, end, start]);
 
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setEffectPosition((prev) => prev.slice(1));
-    }, 1000);
+  // useEffect(() => {
+  //   const timeoutId = setTimeout(() => {
+  //     setEffectPosition((prev) => prev.slice(1));
+  //   }, 1000);
 
-    return () => clearTimeout(timeoutId);
-  }, [effectPosition]);
+  //   return () => clearTimeout(timeoutId);
+  // }, [effectPosition]);
 
   const time1 = startTime - endTime;
   const time2 = startTime2 - endTime2;
