@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
+import { hslToHex } from 'src/utils/hueToRGB';
 import styles from './traffic.module.css';
 
 const MAX = 1000;
+
+const getColor = (score: number): string => {
+  const maxColor = 0;
+  const minColor = 260;
+  const color = minColor + Math.min(score / MAX, 1) * -(minColor - maxColor);
+  return hslToHex(color, 1, 0.5);
+};
 
 export const Traffic = ({
   traffic,
@@ -42,7 +50,7 @@ export const Traffic = ({
             className={styles.traffic}
             style={{
               width: `${Math.min(1, Math.max(0, traffic) / MAX) * 100}%`,
-              backgroundColor: traffic > MAX ? '#f00' : '#00f',
+              backgroundColor: traffic > MAX ? '#800' : getColor(traffic),
             }}
           />
           <p>{`${String(traffic).split('').slice(0, 5).join('')}ms`}</p>
