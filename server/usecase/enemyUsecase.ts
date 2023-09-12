@@ -10,7 +10,7 @@ const updateIntervalId: NodeJS.Timeout[] = [];
 const createIntervalId: NodeJS.Timeout[] = [];
 const ENEMY_UPDATE_INTERVAL = 100;
 const ENEMY_CREATE_INTERVAL = 50;
-const MAXMEM_ENEMY_COUNT = 13;
+const MAXMEM_ENEMY_COUNT = 75;
 
 export const enemyUseCase = {
   init: () => {
@@ -45,17 +45,12 @@ export const enemyUseCase = {
     const newEnemy = await enemyRepository.create({
       id: enemyIdParser.parse(randomUUID()),
       direction: {
-        x:
-          (Math.random() >= 0.5
-            ? 1
-            : // -
-              1) * 0.5,
+        x: (Math.random() >= 0.5 ? 1 : -1) * 0.5,
         y: 0,
       },
       createdPos: {
         x: Math.random() * (SCREEN_WIDTH * displayNumber - 1000) + 500,
-        y: 500,
-        // Math.floor(Math.random() * SCREEN_HEIGHT)
+        y: Math.floor((Math.random() * SCREEN_HEIGHT) / 4),
       },
       createdAt: Date.now(),
       type: Math.floor(Math.random() * 3),
