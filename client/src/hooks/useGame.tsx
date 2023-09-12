@@ -4,26 +4,43 @@ import { useCallback, useEffect, useState } from 'react';
 import { staticPath } from 'src/utils/$path';
 import { apiClient } from 'src/utils/apiClient';
 import { computePosition } from 'src/utils/computePosition';
-import {
-  usePerformanceTimer,
-  usePerformanceTimer2,
-  usePerformanceTimer3,
-  usePerformanceTimer4,
-  usePerformanceTimer5,
-} from './useTimer';
+import { usePerformanceTimer } from './useTimer';
 
 export const useGame = ({ displayPosition }: { displayPosition: number | null }) => {
   const [players, setPlayers] = useState<PlayerModel[]>([]);
   const [enemies, setEnemies] = useState<EnemyModel[]>([]);
   const [bullets, setBullets] = useState<BulletModel[]>([]);
+
+  const [isFetch, setIsFetch] = useState(true);
+
   //TODO: もし、これ以外のエフェクトを追加する場合は、それぞれのエフェクトを区別する型を作成する
   const [effectPosition, setEffectPosition] = useState<number[][][]>([[[]]]);
 
   const { startTime, endTime, start, end } = usePerformanceTimer();
-  const { startTime2, endTime2, start2, end2 } = usePerformanceTimer2();
-  const { startTime3, endTime3, start3, end3 } = usePerformanceTimer3();
-  const { startTime4, endTime4, start4, end4 } = usePerformanceTimer4();
-  const { startTime5, endTime5, start5, end5 } = usePerformanceTimer5();
+  const {
+    startTime: startTime2,
+    endTime: endTime2,
+    start: start2,
+    end: end2,
+  } = usePerformanceTimer();
+  const {
+    startTime: startTime3,
+    endTime: endTime3,
+    start: start3,
+    end: end3,
+  } = usePerformanceTimer();
+  const {
+    startTime: startTime4,
+    endTime: endTime4,
+    start: start4,
+    end: end4,
+  } = usePerformanceTimer();
+  const {
+    startTime: startTime5,
+    endTime: endTime5,
+    start: start5,
+    end: end5,
+  } = usePerformanceTimer();
 
   const fetchPlayers = useCallback(async () => {
     start4();
@@ -61,9 +78,16 @@ export const useGame = ({ displayPosition }: { displayPosition: number | null })
     const res = await apiClient.bullet.$get({
       query: { displayNumber: Number(displayPosition) },
     });
+
     if (res.length > bullets.length) {
       const audio = new Audio(staticPath.sounds.shot_mp3);
       audio.play();
+
+      audio.addEventListener('ended', () => {
+        audio.pause();
+        audio.src = '';
+        audio.load();
+      });
     }
 
     setBullets(res);
@@ -72,28 +96,37 @@ export const useGame = ({ displayPosition }: { displayPosition: number | null })
   }, [bullets.length, displayPosition, end5, start5]);
 
   useEffect(() => {
+    if (!isFetch) return;
     start();
 
     const cancelId = requestAnimationFrame(async () => {
       await Promise.all([fetchPlayers(), fetchEnemies(), fetchBullets()]).then(() => end());
     });
+
     return () => cancelAnimationFrame(cancelId);
-  }, [fetchBullets, fetchEnemies, fetchPlayers, end, start]);
+  }, [fetchBullets, fetchEnemies, fetchPlayers, end, start, isFetch]);
 
-  // useEffect(() => {
-  //   const timeoutId = setTimeout(() => {
-  //     setEffectPosition((prev) => prev.slice(1));
-  //   }, 1000);
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setEffectPosition((prev) => prev.slice(1));
+    }, 1000);
 
-  //   return () => clearTimeout(timeoutId);
-  // }, [effectPosition]);
+    return () => clearTimeout(timeoutId);
+  }, [effectPosition]);
 
   const time1 = startTime - endTime;
   const time2 = startTime2 - endTime2;
   const time3 = startTime3 - endTime3;
   const time4 = startTime4 - endTime4;
   const time5 = startTime5 - endTime5;
-  console.log(effectPosition.length);
+
+  if (time1 > 1000 && isFetch) {
+    console.log('a');
+    setIsFetch(false);
+
+    setTimeout(() => setIsFetch(true), 1000);
+  }
+
   return {
     bullets,
     players,
