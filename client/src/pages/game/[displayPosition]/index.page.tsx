@@ -104,7 +104,7 @@ const Game = () => {
           ))}
         </Layer>
         <Layer>
-          {effectPosition.map((position, index) => (
+          {effectPosition.flat().map((position, index) => (
             <Boom displayPosition={displayPosition ?? 0} position={position} key={index} />
           ))}
         </Layer>
