@@ -6,6 +6,7 @@ import { computePosition } from 'src/utils/computePosition';
 import { usePerformanceTimer } from './useTimer';
 
 export const useGame = ({ displayPosition }: { displayPosition: number | null }) => {
+  //ANCHOR - state
   const [players, setPlayers] = useState<PlayerModel[]>([]);
   const [enemies, setEnemies] = useState<EnemyModel[]>([]);
   const [bullets, setBullets] = useState<BulletModel[]>([]);
@@ -16,24 +17,28 @@ export const useGame = ({ displayPosition }: { displayPosition: number | null })
   const [effectPosition, setEffectPosition] = useState<number[][][]>([[[]]]);
 
   const { startTime, endTime, start, end } = usePerformanceTimer();
+  
   const {
     startTime: startTime2,
     endTime: endTime2,
     start: start2,
     end: end2,
   } = usePerformanceTimer();
+
   const {
     startTime: startTime3,
     endTime: endTime3,
     start: start3,
     end: end3,
   } = usePerformanceTimer();
+
   const {
     startTime: startTime4,
     endTime: endTime4,
     start: start4,
     end: end4,
   } = usePerformanceTimer();
+
   const {
     startTime: startTime5,
     endTime: endTime5,
@@ -41,6 +46,7 @@ export const useGame = ({ displayPosition }: { displayPosition: number | null })
     end: end5,
   } = usePerformanceTimer();
 
+  //ANCHOR - fetch
   const fetchPlayers = useCallback(async () => {
     start4();
     const res = await apiClient.player.$get({
@@ -83,6 +89,7 @@ export const useGame = ({ displayPosition }: { displayPosition: number | null })
     end5();
   }, [displayPosition, end5, start5]);
 
+  //ANCHOR - effect
   useEffect(() => {
     if (!isFetch) return;
     start();
@@ -102,6 +109,7 @@ export const useGame = ({ displayPosition }: { displayPosition: number | null })
     return () => clearTimeout(timeoutId);
   }, [effectPosition]);
 
+  //ANCHOR - function
   const time1 = startTime - endTime;
   const time2 = startTime2 - endTime2;
   const time3 = startTime3 - endTime3;

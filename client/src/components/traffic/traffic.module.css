@@ -1,8 +1,10 @@
 .container {
   position: absolute;
-  z-index: 99;
+  top: 0;
   display: grid;
+  width: 100px;
   max-width: 200px;
+  height: 100svh;
   background-color: #fff8;
   border: solid 1px #0008;
 }
@@ -19,13 +21,11 @@
 
 .stop {
   position: relative;
-  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: center;
   width: auto;
   height: auto;
-  margin: 10px;
   color: #fff;
   border-radius: 10px;
 }
