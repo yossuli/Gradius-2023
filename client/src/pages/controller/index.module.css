@@ -149,3 +149,19 @@
     font-size: 10vw;
   }
 }
+
+.logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 30%;
+}
+
+.logout:hover {
+  background-color: #800;
+}
+
+.logout:active {
+  scale: 0.9;
+}
