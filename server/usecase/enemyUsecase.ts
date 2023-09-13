@@ -10,7 +10,7 @@ const updateIntervalId: NodeJS.Timeout[] = [];
 const createIntervalId: NodeJS.Timeout[] = [];
 const ENEMY_UPDATE_INTERVAL = 100;
 const ENEMY_CREATE_INTERVAL = 50;
-const MAXMEM_ENEMY_COUNT = 75;
+const MAXMEM_ENEMY_COUNT = 150;
 
 export const enemyUseCase = {
   init: () => {

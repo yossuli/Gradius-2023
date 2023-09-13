@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Joystick } from 'react-joystick-component';
 import type { IJoystickUpdateEvent } from 'react-joystick-component/build/lib/Joystick';
 import GameClear from 'src/components/GameClear/GameClear';
+import { staticPath } from 'src/utils/$path';
 import { apiClient } from 'src/utils/apiClient';
 import { getUserIdFromLocalStorage, logoutWithLocalStorage } from 'src/utils/loginWithLocalStorage';
 import styles from './index.module.css';
@@ -60,6 +61,9 @@ const Home = () => {
           userId,
         },
       });
+
+      const audio = new Audio(staticPath.sounds.shot_mp3);
+      audio.play();
     }, SHOOT_INTERVAL_TIME);
     setShootIntervalId((prev) => [...prev, shootIntervalId]);
   };
@@ -178,7 +182,9 @@ const Home = () => {
       </div>
       <div>
         Score: {playerStatus?.score} <br />
-        <button onClick={logoutWithLocalStorage}>logout</button>
+        <button onClick={logoutWithLocalStorage} onTouchStartCapture={logoutWithLocalStorage}>
+          logout
+        </button>
       </div>
       <button
         className={styles.button}

@@ -6,7 +6,7 @@ const MAX = 1000;
 
 const getColor = (score: number): string => {
   const maxColor = 0;
-  const minColor = 260;
+  const minColor = 200;
   const color = minColor + Math.min(score / MAX, 1) * -(minColor - maxColor);
   return hslToHex(color, 1, 0.5);
 };

@@ -1,7 +1,6 @@
 import { ENEMY_HALF_WIDTH } from 'commonConstantsWithClient';
 import type { BulletModel, EnemyModel, PlayerModel } from 'commonTypesWithClient/models';
 import { useCallback, useEffect, useState } from 'react';
-import { staticPath } from 'src/utils/$path';
 import { apiClient } from 'src/utils/apiClient';
 import { computePosition } from 'src/utils/computePosition';
 import { usePerformanceTimer } from './useTimer';
@@ -79,21 +78,10 @@ export const useGame = ({ displayPosition }: { displayPosition: number | null })
       query: { displayNumber: Number(displayPosition) },
     });
 
-    if (res.length > bullets.length) {
-      const audio = new Audio(staticPath.sounds.shot_mp3);
-      audio.play();
-
-      audio.addEventListener('ended', () => {
-        audio.pause();
-        audio.src = '';
-        audio.load();
-      });
-    }
-
     setBullets(res);
 
     end5();
-  }, [bullets.length, displayPosition, end5, start5]);
+  }, [displayPosition, end5, start5]);
 
   useEffect(() => {
     if (!isFetch) return;
