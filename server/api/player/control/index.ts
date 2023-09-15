@@ -1,7 +1,6 @@
 import type { DefineMethods } from 'aspida';
 import type { UserId } from '../../../commonTypesWithClient/branded';
-import type { PlayerModel } from '../../../commonTypesWithClient/models';
-import type { MoveDirection } from '../../../usecase/playerUsecase';
+import type { MoveDirection, PlayerModel } from '../../../commonTypesWithClient/models';
 export type Methods = DefineMethods<{
   get: {
     query: {

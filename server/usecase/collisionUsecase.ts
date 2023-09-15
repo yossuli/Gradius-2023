@@ -15,6 +15,7 @@ import { computePosition } from '$/service/computePositions';
 import { userIdParser } from '$/service/idParsers';
 import { playerUseCase } from './playerUsecase';
 
+//ANCHOR - model
 type EntityModel = PlayerModel | EnemyModel | BulletModel;
 
 type EntityWithPosModel =
@@ -57,6 +58,7 @@ type EntityWithPosModel =
 
 let intervalId: NodeJS.Timeout | null = null;
 
+//ANCHOR - functions
 const givePosition = (entity: EntityModel) => {
   const pos = computePosition(entity);
 
@@ -181,6 +183,7 @@ const checkCollisions = async () => {
   );
 };
 
+//ANCHOR - useCase
 export const collisionUseCase = {
   init: () => {
     intervalId = setInterval(async () => {
