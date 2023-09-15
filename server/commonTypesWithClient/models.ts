@@ -87,3 +87,8 @@ export type EntitiesResponse = {
 };
 
 export type MoveDirection = { x: number; y: number };
+
+export type TimeModel = {
+  userId: UserId;
+  baseTime: null | number;
+};

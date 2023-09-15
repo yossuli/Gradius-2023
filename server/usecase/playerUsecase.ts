@@ -1,69 +1,31 @@
+import { diffToBaseTimeSec } from '$/service/diffToBaseTimeSec';
+import { maxMin } from '$/service/maxMin';
+import { sideToDirectionX } from '$/service/sideToDirectionX';
 import { randomUUID } from 'crypto';
 import { DISPLAY_COUNT, SCREEN_HEIGHT, SCREEN_WIDTH } from '../commonConstantsWithClient';
 import type { UserId } from '../commonTypesWithClient/branded';
-import type { MoveDirection, PlayerModel } from '../commonTypesWithClient/models';
+import type { PlayerModel, TimeModel } from '../commonTypesWithClient/models';
 import { playerRepository } from '../repository/playerRepository';
 import { userIdParser } from '../service/idParsers';
 
-type TimeModel = {
-  userId: UserId;
-  baseTime: null | number;
-};
+export type MoveDirection = { x: number; y: number };
 
-const updateIntervalId: NodeJS.Timeout[] = [];
+export const baseTimes: TimeModel[] = [];
 
-const PLAYER_UPDATE_INTERVAL = 100;
+export const ALLOW_MOVE_HALF_WIDTH = 300;
 
-const baseTimes: TimeModel[] = [];
-
-const diffToBaseTime = (userId: UserId) =>
-  Math.floor(
-    (Date.now() -
-      (baseTimes.find((baseTime) => (baseTime.userId = userId))?.baseTime ?? Date.now())) /
-      1000
-  );
+export const ALLOW_MOVE_SPEED = 5;
 
 export const playerUseCase = {
-  init: () => {
-    updateIntervalId.push(
-      setInterval(() => {
-        playerUseCase.update();
-      }, PLAYER_UPDATE_INTERVAL)
-    );
-  },
-
-  stop: () => {
-    if (updateIntervalId.length > 0) {
-      updateIntervalId.forEach(clearInterval);
-    }
-  },
-
-  update: async () => {
-    const currentPlayers = await playerRepository.findAll();
-    await Promise.all(
-      currentPlayers.map((player) => {
-        const newPlayer: PlayerModel = {
-          ...player,
-          pos: {
-            ...player.pos,
-            x: Math.max(
-              10 * diffToBaseTime(player.id) - 150,
-              Math.min(10 * diffToBaseTime(player.id) + 150, player.pos.x)
-            ),
-          },
-        };
-        return playerRepository.save(newPlayer);
-      })
-    );
-  },
-
   create: async (name: string): Promise<PlayerModel> => {
     const [leftCount, rightCount] = await Promise.all([
       playerRepository.countInSide('left'),
       playerRepository.countInSide('right'),
     ]);
-    const side = 'left';
-    // leftCount <= rightCount ? 'left' : 'right';
+    const side =
+      // leftCount <= rightCount ?
+      'left';
+    //  : 'right';
     const x = side === 'left' ? 50 : SCREEN_WIDTH * DISPLAY_COUNT - 50;
 
     const playerData: PlayerModel = {
@@ -84,39 +46,33 @@ export const playerUseCase = {
       baseTimes.push({ userId, baseTime: Date.now() });
     }
 
-    const isOutOfDisplay = (
-      pos: { x: number; y: number },
-      side: 'left' | 'right',
-      displayNumber: number
-    ) => {
-      const terms = [
-        side === 'left' && pos.x >= SCREEN_WIDTH * displayNumber,
-        side === 'right' && pos.x <= 0,
-      ];
-      return terms.some(Boolean);
-    };
-
     const currentPlayer = await playerRepository.find(userId);
     if (currentPlayer === null) return null;
 
     const newPos = {
-      x: Math.max(
-        10 * diffToBaseTime(userId) - 150,
+      x: maxMin(
+        ALLOW_MOVE_HALF_WIDTH +
+          SCREEN_WIDTH * DISPLAY_COUNT * -Math.min(0, sideToDirectionX(currentPlayer.side)) +
+          diffToBaseTimeSec(currentPlayer.id, baseTimes) *
+            50 *
+            sideToDirectionX(currentPlayer.side),
+        -ALLOW_MOVE_HALF_WIDTH +
+          SCREEN_WIDTH * DISPLAY_COUNT * -Math.min(0, sideToDirectionX(currentPlayer.side)) +
+          diffToBaseTimeSec(currentPlayer.id, baseTimes) *
+            50 *
+            sideToDirectionX(currentPlayer.side),
         Math.min(
-          10 * diffToBaseTime(userId) + 150,
-          Math.min(
-            Math.max(currentPlayer.pos.x + moveDirection.x * 5, 0),
-            SCREEN_WIDTH * DISPLAY_COUNT
-          )
+          Math.max(currentPlayer.pos.x + moveDirection.x * ALLOW_MOVE_SPEED, 0),
+          SCREEN_WIDTH * DISPLAY_COUNT
         )
       ),
-      y: Math.min(Math.max(currentPlayer.pos.y + moveDirection.y * 5, 0), SCREEN_HEIGHT),
+
+      y: Math.min(
+        Math.max(currentPlayer.pos.y + moveDirection.y * ALLOW_MOVE_SPEED, 0),
+        SCREEN_HEIGHT
+      ),
     };
 
-    if (isOutOfDisplay(newPos, currentPlayer.side, DISPLAY_COUNT)) {
-      await playerUseCase.finishGame(currentPlayer);
-      return null;
-    }
     const updatePlayerInfo: PlayerModel = {
       ...currentPlayer,
       pos: newPos,
@@ -141,15 +97,68 @@ export const playerUseCase = {
     return await playerRepository.save(updatePlayerInfo);
   },
 
-  getPlayersByDisplay: async (displayNumber: number) => {
-    const isInDisplay = (posX: number, displayNumber: number) => {
+  getPlayersByDisplay: async (displayNumber?: number) => {
+    const isOutOfGameDisplay = (
+      pos: { x: number; y: number },
+      side: 'left' | 'right',
+      displayNumber: number
+    ) => {
+      const terms = [
+        side === 'left' && pos.x >= SCREEN_WIDTH * displayNumber,
+        side === 'right' && pos.x <= 0,
+      ];
+      return terms.some(Boolean);
+    };
+
+    const isInThisDisplay = (posX: number, displayNumber: number) => {
       return Math.floor(posX / SCREEN_WIDTH) === displayNumber;
     };
+
     const players = await playerRepository.findAll();
 
-    const playersInDisplay = players.filter((player) => {
-      return isInDisplay(player.pos.x, displayNumber) && player.isPlaying;
-    });
+    const diffToBaseTime = (userId: UserId) =>
+      Math.floor(
+        (Date.now() -
+          (baseTimes.find((baseTime) => (baseTime.userId = userId))?.baseTime ?? Date.now())) /
+          20
+      );
+
+    const computeScroll = (player: PlayerModel) => {
+      if (player.isPlaying === false) return player;
+      const newPlayer = {
+        ...player,
+        pos: {
+          ...player.pos,
+          x: maxMin(
+            ALLOW_MOVE_HALF_WIDTH +
+              SCREEN_WIDTH * DISPLAY_COUNT * -Math.min(0, sideToDirectionX(player.side)) +
+              diffToBaseTime(player.id) * sideToDirectionX(player.side),
+            -ALLOW_MOVE_HALF_WIDTH +
+              SCREEN_WIDTH * DISPLAY_COUNT * -Math.min(0, sideToDirectionX(player.side)) +
+              diffToBaseTime(player.id) * sideToDirectionX(player.side),
+            player.pos.x
+          ),
+        },
+      };
+      return newPlayer;
+    };
+
+    const playersInDisplay = players.reduce((prev, curr) => {
+      if (
+        curr.isPlaying === false &&
+        displayNumber !== undefined &&
+        !isInThisDisplay(curr.pos.x, displayNumber)
+      )
+        return [...prev];
+
+      const newPlayer = computeScroll(curr);
+
+      if (isOutOfGameDisplay(newPlayer.pos, newPlayer.side, DISPLAY_COUNT)) {
+        playerUseCase.finishGame(curr);
+        return [...prev];
+      }
+      return [...prev, newPlayer];
+    }, [] as PlayerModel[]);
 
     return playersInDisplay;
   },
