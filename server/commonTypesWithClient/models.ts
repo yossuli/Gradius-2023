@@ -85,3 +85,5 @@ export type EntitiesResponse = {
   enemies: EnemyModelWithPos[];
   players: PlayerModel[];
 };
+
+export type MoveDirection = { x: number; y: number };
