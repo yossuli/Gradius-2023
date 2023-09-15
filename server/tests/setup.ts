@@ -4,6 +4,7 @@ import { prismaClient } from '$/service/prismaClient';
 import { bulletUseCase } from '$/usecase/bulletUsecase';
 import { collisionUseCase } from '$/usecase/collisionUsecase';
 import { enemyUseCase } from '$/usecase/enemyUsecase';
+import { playerUseCase } from '$/usecase/playerUsecase';
 import { exec } from 'child_process';
 import type { FastifyInstance } from 'fastify';
 import util from 'util';
@@ -29,5 +30,6 @@ afterEach(async (info) => {
   collisionUseCase.stop();
   enemyUseCase.stop();
   bulletUseCase.stop();
+  playerUseCase.stop();
   await server.close();
 });

@@ -3,6 +3,7 @@ import { API_BASE_PATH, CORS_ORIGIN } from '$/service/envValues';
 import { bulletUseCase } from '$/usecase/bulletUsecase';
 import { collisionUseCase } from '$/usecase/collisionUsecase';
 import { enemyUseCase } from '$/usecase/enemyUsecase';
+import { playerUseCase } from '$/usecase/playerUsecase';
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
@@ -18,6 +19,7 @@ export const init = (serverFactory?: FastifyServerFactory) => {
   bulletUseCase.init();
   enemyUseCase.init();
   collisionUseCase.init();
+  playerUseCase.init();
 
   return app;
 };
