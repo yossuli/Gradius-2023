@@ -8,10 +8,14 @@ import type { UserId } from '$/commonTypesWithClient/branded';
 import { bulletRepository } from '$/repository/bulletRepository';
 import { playerRepository } from '$/repository/playerRepository';
 import { computePosition } from '$/service/computePositions';
+import { diffToBaseTimeSec } from '$/service/diffToBaseTimeSec';
 import { entityChangeWithPos } from '$/service/entityChangeWithPos';
 import { bulletIdParser } from '$/service/idParsers';
+import { maxMin } from '$/service/maxMin';
+import { sideToDirectionX } from '$/service/sideToDirectionX';
 import { randomUUID } from 'crypto';
 import type { BulletModel, BulletModelWithPos } from '../commonTypesWithClient/models';
+import { ALLOW_MOVE_HALF_WIDTH, baseTimes } from './playerUsecase';
 
 let intervalId: NodeJS.Timeout | null = null;
 const BULLET_UPDATE_INTERVAL = 25;
@@ -37,11 +41,25 @@ export const bulletUseCase = {
     const newBullet: BulletModel = {
       id: bulletIdParser.parse(randomUUID()),
       direction: {
-        x: shooterInfo.side === 'left' ? 1 : -1,
+        x: sideToDirectionX(shooterInfo.side),
         y: 0,
       },
       createdPos: {
-        x: shooterInfo.pos.x + PLAYER_HALF_WIDTH * (shooterInfo.side === 'left' ? 1 : -1),
+        x:
+          maxMin(
+            ALLOW_MOVE_HALF_WIDTH +
+              SCREEN_WIDTH * DISPLAY_COUNT * -Math.min(0, sideToDirectionX(shooterInfo.side)) +
+              diffToBaseTimeSec(shooterInfo.id, baseTimes) *
+                50 *
+                sideToDirectionX(shooterInfo.side),
+            -ALLOW_MOVE_HALF_WIDTH +
+              SCREEN_WIDTH * DISPLAY_COUNT * -Math.min(0, sideToDirectionX(shooterInfo.side)) +
+              diffToBaseTimeSec(shooterInfo.id, baseTimes) *
+                50 *
+                sideToDirectionX(shooterInfo.side),
+            shooterInfo.pos.x
+          ) +
+          PLAYER_HALF_WIDTH * sideToDirectionX(shooterInfo.side),
         y: shooterInfo.pos.y,
       },
       createdAt: Date.now(),
